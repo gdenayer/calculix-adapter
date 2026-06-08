@@ -561,7 +561,7 @@ void FORTRAN(calinput, (double *co, ITG *nk, ITG *kon, ITG *ipkon, char *lakon,
                         double *velo, double *veloo, ITG *ne2boun, ITG *itempuser,
                         ITG *irobustdesign, ITG *irandomtype, double *randomval,
                         ITG *nfc, ITG *nfc_, double *coeffc, ITG *idck, ITG *ndc,
-                        ITG *ndc_, double *edc));
+                        ITG *ndc_, double *edc, ITG *irestart, double *accrestart));
 
 void FORTRAN(calinput_rfn, (double *co, char *filab, char *set, ITG *istartset,
                             ITG *iendset, ITG *ialset, ITG *nset, ITG *nset_,
@@ -1172,7 +1172,8 @@ void dealloc_cal(ITG *ncs_, ITG **icsp, ITG *mcs, double **csp,
                  ITG *irefineloop, ITG **iparentelp, ITG **iprfnp, ITG **konrfnp,
                  double **ratiorfnp, char **headingp, ITG **nodedesip,
                  double **dgdxglobp, double **g0p, ITG *nuel_, double **xdesip,
-                 ITG *nfc, double **coeffcp, ITG **idckp, double **edcp);
+                 ITG *nfc, double **coeffcp, ITG **idckp, double **edcp,
+                 double **accrestartp);
 
 void FORTRAN(desiperelem, (ITG * ndesi, ITG *istartdesi, ITG *ialdesi,
                            ITG *ipoeldi, ITG *ieldi, ITG *ne,
@@ -3074,7 +3075,7 @@ void nonlingeo(double **co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                ITG *network, char *orname, double *vel, ITG *nef,
                double *velo, double *veloo, double *energy, ITG *itempuser,
                ITG *ipobody, ITG *inewton, double *t0g, double *t1g,
-               ITG *ifreebody);
+               ITG *ifreebody, ITG irestart, double *accrestart);
 
 void nonlingeo_precice(double **co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                        ITG *ne,
@@ -3124,7 +3125,8 @@ void nonlingeo_precice(double **co, ITG *nk, ITG **konp, ITG **ipkonp, char **la
                        ITG *network, char *orname, double *vel, ITG *nef,
                        double *velo, double *veloo, double *energy, ITG *itempuser,
                        ITG *ipobody, ITG *inewton, double *t0g, double *t1g,
-                       ITG *ifreebody, char *preciceParticipantName, char *configFilename);
+                       ITG *ifreebody, ITG irestart, double *accrestart,
+                       char *preciceParticipantName, char *configFilename);
 
 void FORTRAN(nonlinmpc, (double *co, double *vold, ITG *ipompc, ITG *nodempc,
                          double *coefmpc, char *labmpc, ITG *nmpc, ITG *ikboun,
@@ -3911,7 +3913,8 @@ void FORTRAN(restartwrite, (ITG * istep, ITG *nset, ITG *nload, ITG *nforc,
                             ITG *nintpoint, ITG *ifacecount, ITG *islavsurf, double *pslavsurf,
                             double *clearini, ITG *irstrt, double *vel, ITG *nef, double *velo,
                             double *veloo, ITG *ne2boun, ITG *memmpc_, char *heading, ITG *nheading_,
-                            ITG *network, ITG *nfc, ITG *ndc, double *coeffc, ITG *ikdc, double *edc));
+                            ITG *network, ITG *nfc, ITG *ndc, double *coeffc, ITG *ikdc, double *edc,
+                            double *accold));
 
 void FORTRAN(resultnet, (ITG * itg, ITG *ieg, ITG *ntg,
                          double *bc, ITG *nload, char *sideload,
@@ -4897,7 +4900,7 @@ void FORTRAN(thickness, (ITG * nobject, ITG *nodedesiboun,
                          double *zo, double *x, double *y, double *z, ITG *nx,
                          ITG *ny, ITG *nz, double *co, ITG *ifree, ITG *ndesia,
                          ITG *ndesib, ITG *iobject, ITG *ndesi, double *dgdxglob,
-                         ITG *nk, ITG *normdesi));
+                         ITG *nk, double *normdesi));
 
 void thicknessmain(double *co, ITG *nobject, ITG *nk,
                    ITG *nodedesi, ITG *ndesi, char *objectset, ITG *ipkon,

@@ -140,6 +140,7 @@ typedef struct SimulationData {
   double  coupling_init_theta;
   double  coupling_init_dtheta;
   double  solver_dt;
+  double *ttime;  // DBG
 
   // Configuration information
   int isModalDynamic; // 0 for regular simulations, 1 for modal dynamic
@@ -326,5 +327,18 @@ void PreciceInterface_ConfigureCouplingData(PreciceInterface *interface, Simulat
  * @param preciceInterface
  */
 void PreciceInterface_FreeData(PreciceInterface *preciceInterface);
+
+/**
+ * @brief Writes initial coupling data to file for verification after restart
+ * @param sim: Structure with CalculiX data
+ */
+void Precice_writeInitialDataToFile(SimulationData *sim);
+
+/**
+ * @brief Writes displacement data to file at each coupling iteration
+ * @param sim: Structure with CalculiX data
+ */
+void Precice_writeDisplacementsToFile(SimulationData *sim);
+
 
 #endif // PRECICEINTERFACE_H

@@ -58,6 +58,9 @@ void Precice_Setup(char *configFilename, char *participantName, SimulationData *
   // Initialize preCICE
   precicec_initialize();
 
+  // DBG Write initial data for verification
+  //  Precice_writeInitialDataToFile(sim);
+
   // Initialize coupling data
   printf("Initializing coupling data\n");
   fflush(stdout);
@@ -380,6 +383,9 @@ void Precice_WriteCouplingData(SimulationData *sim)
         } else {
           getNodeDisplacements(interfaces[i]->nodeIDs, interfaces[i]->numNodes, interfaces[i]->dimCCX, sim->vold, sim->mt, interfaces[i]->nodeVectorData);
           precicec_writeData(interfaces[i]->couplingMeshName, interfaces[i]->displacements, interfaces[i]->numNodes, interfaces[i]->preciceNodeIDs, interfaces[i]->nodeVectorData);
+
+          // DBG Write to file after displacements are prepared
+          // Precice_writeDisplacementsToFile(sim);
         }
         printf("Writing DISPLACEMENTS coupling data.\n");
         break;
@@ -624,7 +630,9 @@ void PreciceInterface_ConfigureNodesMesh(PreciceInterface *interface, Simulation
   interface->nodeIDs   = &sim->ialset[sim->istartset[interface->nodeSetID] - 1]; // Lucia: make a copy
 
   interface->nodeCoordinates = malloc(interface->numNodes * interface->dimCCX * sizeof(double));
-  getNodeCoordinates(interface->nodeIDs, interface->numNodes, interface->dimCCX, sim->co, sim->vold, sim->mt, interface->nodeCoordinates);
+
+  /* getNodeCoordinates(interface->nodeIDs, interface->numNodes, interface->dimCCX, sim->co, sim->vold, sim->mt, interface->nodeCoordinates); */
+  getInitialNodeCoordinates(interface->nodeIDs, interface->numNodes, interface->dimCCX, sim->co, interface->nodeCoordinates);
 
   // If 2D-3Q coupling is used (for a node mesh) delegate this to the specialized data structure.
   if (interface->nodesMeshName != NULL) {
@@ -836,4 +844,131 @@ void PreciceInterface_FreeData(PreciceInterface *preciceInterface)
   free(preciceInterface->pressure);
   free(preciceInterface->temperature);
   free(preciceInterface->velocities);
+}
+
+// Write initial coupling data to file for verification
+void Precice_writeInitialDataToFile(SimulationData *sim)
+{
+  FILE *fp = fopen("precice_initial_data.txt", "w");
+  if (fp == NULL) {
+    printf("WARNING: Could not open precice_initial_data.txt for writing\n");
+    return;
+  }
+
+  fprintf(fp, "=== Initial Coupling Data ===\n");
+  fprintf(fp, "Restart data verification after precicec_requiresInitialData()\n\n");
+
+  PreciceInterface **interfaces = sim->preciceInterfaces;
+  int numInterfaces = sim->numPreciceInterfaces;
+  int i, j;
+
+  // coupling_init_v is used only in case of DISPLACEMENTSDELTAS
+  /* for (i = 0; i < numInterfaces; i++) { */
+  /*   fprintf(fp, "\n--- Interface %d: %s ---\n", i, interfaces[i]->couplingMeshName); */
+  /*   fprintf(fp, "Number of nodes: %d\n", interfaces[i]->numNodes); */
+  /*   fprintf(fp, "Number of elements: %d\n", interfaces[i]->numElements); */
+
+  /*   // Write coupling_init_v data */
+  /*   for (j = 0; j < interfaces[i]->numWriteData; j++) { */
+  /*     if (interfaces[i]->writeData[j] == DISPLACEMENTS) { */
+  /*       fprintf(fp, "\nDisplacements (from coupling_init_v):\n"); */
+  /*       fprintf(fp, "Node_ID\t\tX_Disp\t\t\tY_Disp\t\t\tZ_Disp\n"); */
+  /*       for (int k = 0; k < interfaces[i]->numNodes; k++) { */
+  /*         int nodeID = interfaces[i]->nodeIDs[k]; */
+  /*         int idx = (nodeID - 1) * sim->mt; // CalculiX uses 1-based indexing */
+  /*         fprintf(fp, "%d\t\t%e\t%e\t%e\n", */
+  /*                 nodeID, */
+  /*                 sim->coupling_init_v[idx + 1],      // X displacement */
+  /*                 sim->coupling_init_v[idx + 2],      // Y displacement */
+  /*                 sim->coupling_init_v[idx + 3]);     // Z displacement */
+  /*       } */
+  /*     } */
+  /*   } */
+  /* } */
+
+  for (i = 0; i < numInterfaces; i++) {
+    // Check if this interface writes displacements
+    int writes_displacements = 0;
+    for (j = 0; j < interfaces[i]->numWriteData; j++) {
+      if (interfaces[i]->writeData[j] == DISPLACEMENTS) {
+        writes_displacements = 1;
+        break;
+      }
+    }
+
+    if (writes_displacements) {
+      fprintf(fp, "\n--- Interface %d: %s ---\n", i, interfaces[i]->couplingMeshName);
+      fprintf(fp, "Number of nodes: %d\n", interfaces[i]->numNodes);
+      fprintf(fp, "\nDisplacements (from nodeVectorData):\n");
+      fprintf(fp, "Node_ID\t\tX_Disp\t\t\tY_Disp\t\t\tZ_Disp\n");
+
+      for (j = 0; j < interfaces[i]->numNodes; j++) {
+        int nodeID = interfaces[i]->nodeIDs[j];
+        fprintf(fp, "%d\t\t%e\t%e\t%e\n",
+                nodeID,
+                interfaces[i]->nodeVectorData[3 * j],
+                interfaces[i]->nodeVectorData[3 * j + 1],
+                interfaces[i]->nodeVectorData[3 * j + 2]);
+      }
+    }
+  }
+
+  fprintf(fp, "\n=== End of Initial Data ===\n");
+  fclose(fp);
+  printf("DBG Initial coupling data written to precice_initial_data.txt\n");
+  fflush(stdout);
+}
+
+// Write displacement data to file with time step info
+void Precice_writeDisplacementsToFile(SimulationData *sim)
+{
+  char filename[256];
+  // total time is computed based on theta and tper and not on dtheta,
+  // since theta is updated in nonlinegeo_precice.c just before the
+  // call of Precice_WriteCouplingData
+  double actual_total_time = *sim->ttime + *sim->theta * *sim->tper;
+  // Create filename: displacements_TS<timeStep>_Iter<iteration>.txt
+  //  snprintf(filename, sizeof(filename), "displacements_T%e.txt", actual_total_time);
+  snprintf(filename, sizeof(filename), "displacements_T%012.8f.txt", actual_total_time);
+  FILE *fp = fopen(filename, "w");
+  if (fp == NULL) {
+    printf("WARNING: Could not open %s for writing\n", filename);
+    return;
+  }
+  fprintf(fp, "=== Displacements at Actual Total Time %e ===\n", actual_total_time);
+  fprintf(fp, "Solver DT: %f\n\n", sim->solver_dt);
+
+  PreciceInterface **interfaces = sim->preciceInterfaces;
+  int numInterfaces = sim->numPreciceInterfaces;
+  int i, j;
+
+  for (i = 0; i < numInterfaces; i++) {
+    // Check if this interface writes displacements
+    int writes_displacements = 0;
+    for (j = 0; j < interfaces[i]->numWriteData; j++) {
+      if (interfaces[i]->writeData[j] == DISPLACEMENTS) {
+        writes_displacements = 1;
+        break;
+      }
+    }
+
+    if (writes_displacements) {
+      fprintf(fp, "\n--- Interface %d: %s ---\n", i, interfaces[i]->couplingMeshName);
+      fprintf(fp, "Number of nodes: %d\n", interfaces[i]->numNodes);
+      fprintf(fp, "Node_ID\t\tX_Disp\t\t\tY_Disp\t\t\tZ_Disp\n");
+
+      for (j = 0; j < interfaces[i]->numNodes; j++) {
+        int nodeID = interfaces[i]->nodeIDs[j];
+        fprintf(fp, "%d\t\t%e\t%e\t%e\n",
+                nodeID,
+                interfaces[i]->nodeVectorData[3 * j],
+                interfaces[i]->nodeVectorData[3 * j + 1],
+                interfaces[i]->nodeVectorData[3 * j + 2]);
+      }
+    }
+  }
+
+  fclose(fp);
+  printf("DBG Displacements written to %s\n", filename);
+  fflush(stdout);
 }

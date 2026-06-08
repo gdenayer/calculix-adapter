@@ -114,6 +114,15 @@ void getSurfaceElementsAndFaces(ITG setID, ITG *ialset, ITG *istartset, ITG *ien
 void getNodeCoordinates(ITG *nodes, ITG numNodes, int dim, double *co, double *v, int mt, double *coordinates);
 
 /**
+ * @brief Gets the coordinates of a list of input node IDs (undeformed mesh)
+ * @param nodes: input node IDs
+ * @param numNodes: number of input nodes
+ * @param co: CalculiX array with all the node coordinates
+ * @param coordinates: output array with the coordinates of the input nodes of the undeformed mesh
+ */
+void getInitialNodeCoordinates(ITG *nodes, ITG numNodes, int dim, double *co, double *coordinates);
+
+/**
  * @brief getNodeTemperatures
  * @param nodes: input node IDs
  * @param numNodes: number of input nodes

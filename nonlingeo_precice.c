@@ -89,7 +89,7 @@ void nonlingeo_precice(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **l
                        ITG *network, char *orname, double *vel, ITG *nef,
                        double *velo, double *veloo, double *energy, ITG *itempuser,
                        ITG *ipobody, ITG *inewton, double *t0g, double *t1g,
-                       ITG *ifreebody,
+                       ITG *ifreebody,ITG irestart, double *accrestart,
                        /* Adapter: Add variables for the participant name and the config file */
                        char *preciceParticipantName, char *configFilename)
 {
@@ -179,7 +179,7 @@ void nonlingeo_precice(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **l
          *smscale = NULL, dtset, energym = 0., energymold = 0., *voldf = NULL,
          *coefmpcf = NULL, *xbounf = NULL, *xloadf = NULL, *xbounoldf = NULL,
          *xbounactf = NULL, *xloadoldf = NULL, *xloadactf = NULL, *auw = NULL, *volddof = NULL,
-         *qb = NULL, *aloc = NULL, dtmin, *fric = NULL;
+         *qb = NULL, *aloc = NULL, dtmin, *fric = NULL, *veoldRestart=NULL;
 
   FILE *f1;
 
@@ -227,6 +227,14 @@ void nonlingeo_precice(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **l
 
   delcon = ctrl[53];
   alea   = ctrl[54];
+
+/*If this is a restart, save restart velocities.
+This is required because of an iout=-1 result evaluation on restart 
+that does not occur with no-restart implicit iterations */
+  if(irestart==1){
+  	NNEW(veoldRestart,double,mt**nk);
+  	memcpy(&veoldRestart[0],&veold[0],sizeof(double)*mt**nk);
+  }
 
 #ifdef SGI
   ITG token;
@@ -346,6 +354,7 @@ void nonlingeo_precice(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **l
       .cocon                = cocon,
       .ncocon               = ncocon,
       .mi                   = mi,
+      .ttime                = ttime,  // DBG
       .isModalDynamic       = 0,
       .eigenDOFs            = NULL,
       .eigenDOFsDerivatives = NULL,
@@ -1663,7 +1672,7 @@ void nonlingeo_precice(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **l
     Precice_AdjustSolverTimestep(&simulationData);
     /* Adapter read coupling data if available */
     Precice_ReadCouplingData(&simulationData);
-
+  
     if (icutb == 0) {
 
       /* previous increment converged: update the initial values */
@@ -2192,6 +2201,14 @@ void nonlingeo_precice(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **l
     /* prediction of the kinematic vectors  */
 
     NNEW(v, double, mt **nk);
+
+    //If this is a restart, fix the accelerations and velocities prior to prediction on the 1st increment
+    if(iinc==1 && irestart==1){
+      for(k=0;k<(mt**nk);k++){
+	accold[k] = accrestart[k];
+	veold[k] = veoldRestart[k];
+      }
+    }
 
     /* for massless contact there is no need for prediction,
        since scheme is on velocity level */
@@ -4422,6 +4439,7 @@ void nonlingeo_precice(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **l
 
   SFREE(f);
   SFREE(b);
+  SFREE(veoldRestart);
   SFREE(xbounact);
   SFREE(xforcact);
   SFREE(xloadact);

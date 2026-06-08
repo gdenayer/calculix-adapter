@@ -82,6 +82,20 @@ void getNodeCoordinates(ITG *nodes, ITG numNodes, int dim, double *co, double *v
   }
 }
 
+void getInitialNodeCoordinates(ITG *nodes, ITG numNodes, int dim, double *co, double *coordinates)
+{
+
+  ITG i, j;
+
+  for (i = 0; i < numNodes; i++) {
+    int nodeIdx = nodes[i] - 1;
+    // coordinates of the undeformed mesh
+    for (j = 0; j < dim; j++) {
+      coordinates[i * dim + j] = co[nodeIdx * 3 + j];
+    }
+  }
+}
+
 void getNodeTemperatures(ITG *nodes, ITG numNodes, double *v, int mt, double *temperatures)
 {
 
