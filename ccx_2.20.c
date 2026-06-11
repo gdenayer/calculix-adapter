@@ -28,6 +28,7 @@ _set_output_format(_TWO_DIGIT_EXPONENT);
 #include <stdlib.h>
 #include <string.h>
 #include "CalculiX.h"
+#include "dyna_precice.h"
 
 #ifdef CALCULIX_MPI
 ITG myid = 0, nproc = 0;
