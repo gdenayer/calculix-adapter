@@ -3914,7 +3914,7 @@ void FORTRAN(restartwrite, (ITG * istep, ITG *nset, ITG *nload, ITG *nforc,
                             double *clearini, ITG *irstrt, double *vel, ITG *nef, double *velo,
                             double *veloo, ITG *ne2boun, ITG *memmpc_, char *heading, ITG *nheading_,
                             ITG *network, ITG *nfc, ITG *ndc, double *coeffc, ITG *ikdc, double *edc,
-                            double *accold));
+                            double *xmodal,double *accold));
 
 void FORTRAN(resultnet, (ITG * itg, ITG *ieg, ITG *ntg,
                          double *bc, ITG *nload, char *sideload,

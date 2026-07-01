@@ -2171,7 +2171,7 @@ int main(int argc, char *argv[])
                                &mortar, &nintpoint, &ifacecount, islavsurf,
                                pslavsurf, clearini, irstrt, vel, &nef, velo, veloo,
                                ne2boun, &memmpc_, heading, &nheading_, &network,
-                               &nfc, &ndc, coeffc, ikdc, edc, accold));
+                               &nfc, &ndc, coeffc, ikdc, edc, xmodal, accold));
       }
     }
   }
