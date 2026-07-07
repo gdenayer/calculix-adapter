@@ -66,22 +66,22 @@ int main(int argc, char *argv[])
       *ipobody = NULL, inewton = 0, *iprfn = NULL, *konrfn = NULL;
 
   ITG nk, ne, nboun, nmpc, nforc, nload, nprint, nset, nalset, nentries = 18,
-                                                               nmethod, neq[3], i, mpcfree, mei[4] = {0, 0, 0, 0}, j, nzl, nam, nbounold,
-                                                               nforcold, nloadold, nbody, nbody_, nbodyold, network, nheading_,
-                                                               k, nzs[3], nmpc_, nload_, nforc_, istep, istat, nboun_, nintpoint,
-                                                               iperturb[2], nmat, ntmat_, norien, ithermal[2] = {0, 0}, nmpcold,
-                                                               iprestr, kode, isolver, nslavs, nkon_, ne0, nkon0, mortar,
-                                                               jout[2], nlabel, nkon, idrct, jmax[2], iexpl, nevtot, ifacecount,
-                                                               iplas, npmat_, mi[3], ntrans, mpcend, namtot_, iumat, iheading,
-                                                               icascade, maxlenmpc, mpcinfo[4], ne1d, ne2d, infree[4],
-                                                               callfrommain, nflow, jin = 0, irstrt[2], nener, jrstrt, nenerold,
-                                                               nline, *ipoinp = NULL, *inp = NULL, ntie, ntie_, mcs, nprop_,
-                                                               nprop, itpamp, iviewfile, nkold, nevdamp_, npt_, cyclicsymmetry,
-                                                               nmethodl, iaxial, inext, icontact, nobject, nobject_, iit,
-                                                               nzsprevstep[3], memmpcref_, mpcfreeref, maxlenmpcref, *nodempcref = NULL,
-                                                               *ikmpcref   = NULL, isens, namtot, nstam, ndamp, nef, inp_size,
-                                                               *ipoinp_sav = NULL, *inp_sav = NULL, irefineloop = 0, icoordinate = 0,
-                                                               *nodedesi = NULL, ndesi = 0, nobjectstart = 0, nfc_, ndc_, nfc, ndc, *ikdc = NULL,irestart=0;
+      nmethod, neq[3], i, mpcfree, mei[4] = {0, 0, 0, 0}, j, nzl, nam, nbounold,
+      nforcold, nloadold, nbody, nbody_, nbodyold, network, nheading_,
+      k, nzs[3], nmpc_, nload_, nforc_, istep, istat, nboun_, nintpoint,
+      iperturb[2], nmat, ntmat_, norien, ithermal[2] = {0, 0}, nmpcold,
+      iprestr, kode, isolver, nslavs, nkon_, ne0, nkon0, mortar,
+      jout[2], nlabel, nkon, idrct, jmax[2], iexpl, nevtot, ifacecount,
+      iplas, npmat_, mi[3], ntrans, mpcend, namtot_, iumat, iheading,
+      icascade, maxlenmpc, mpcinfo[4], ne1d, ne2d, infree[4],
+      callfrommain, nflow, jin = 0, irstrt[2], nener, jrstrt, nenerold,
+      nline, *ipoinp = NULL, *inp = NULL, ntie, ntie_, mcs, nprop_,
+      nprop, itpamp, iviewfile, nkold, nevdamp_, npt_, cyclicsymmetry,
+      nmethodl, iaxial, inext, icontact, nobject, nobject_, iit,
+      nzsprevstep[3], memmpcref_, mpcfreeref, maxlenmpcref, *nodempcref = NULL,
+      *ikmpcref   = NULL, isens, namtot, nstam, ndamp, nef, inp_size,
+      *ipoinp_sav = NULL, *inp_sav = NULL, irefineloop = 0, icoordinate = 0,
+      *nodedesi = NULL, ndesi = 0, nobjectstart = 0, nfc_, ndc_, nfc, ndc, *ikdc = NULL,irestart=0;
 
   ITG *meminset = NULL, *rmeminset = NULL;
 
@@ -147,8 +147,8 @@ int main(int argc, char *argv[])
 
     /*    for(i=1;i<argc;i++){
       if(strcmp1(argv[i],"-o")==0){
-	strcpy(output,argv[i+1]);break;}
-	}*/
+        strcpy(output,argv[i+1]);break;}
+        }*/
 
     for (i = 1; i < argc; i++) {
       if (strcmp1(argv[i], "-o") == 0) {
@@ -459,8 +459,8 @@ int main(int argc, char *argv[])
       }
 
       /* the number in next line is NOT 1.2357111317 -> points
-	 to user input; instead it is a generic nonzero
-	 initialization */
+         to user input; instead it is a generic nonzero
+         initialization */
 
       if (istep == 0) {
         DMEMSET(t0, 0, nk_, 1.2357111319);
@@ -542,12 +542,12 @@ int main(int argc, char *argv[])
       if ((nmethod != 4) && (nmethod != 5) && (nmethod != 8) && (nmethod != 9) &&
           ((abs(nmethod) != 1) || (iperturb[0] < 2))) {
         NNEW(veold, double, mt *nk_);
-	NNEW(accrestart, double, mt*nk_);
+        NNEW(accrestart, double, mt*nk_);
       } else {
         RENEW(veold, double, mt *nk_);
         DMEMSET(veold, mt * nk, mt * nk_, 0.);
-	RENEW(accrestart, double, mt*nk_);
-	DMEMSET(accrestart, mt*nk, mt*nk_,0.);
+        RENEW(accrestart, double, mt*nk_);
+        DMEMSET(accrestart, mt*nk, mt*nk_,0.);
       }
       RENEW(vold, double, mt *nk_);
       DMEMSET(vold, mt * nk, mt * nk_, 0.);
@@ -632,8 +632,13 @@ int main(int argc, char *argv[])
         NNEW(t1old, double, nk_);
       NNEW(sti, double, 6 * mi[0] * ne);
       NNEW(eme, double, 6 * mi[0] * ne);
-      if (nener == 1)
-        NNEW(ener, double, mi[0] * ne * 2);
+      if (nener == 1) {
+        if (mortar != 1) {
+          NNEW(ener, double, 2 * mi[0] * (ne+nslavs));
+        } else {
+          NNEW(ener, double, 2 * mi[0] * ne);
+        }
+      }
       if (mcs > ntie_)
         RENEW(cs, double, 17 * mcs);
       if (mortar == 1) {
@@ -1009,10 +1014,10 @@ int main(int argc, char *argv[])
       RENEW(vold, double, mt *nk);
 
       /* if the SPC boundary conditions were changed in the present step,
-	 they have to be rematched with those in the last step. Removed SPC 
-	 boundary conditions do not appear any more (this is different from
-	 forces and loads, where removed forces or loads are reset to zero;
-	 a removed SPC constraint does not have a numerical value any more) */
+         they have to be rematched with those in the last step. Removed SPC 
+         boundary conditions do not appear any more (this is different from
+         forces and loads, where removed forces or loads are reset to zero;
+         a removed SPC constraint does not have a numerical value any more) */
 
       NNEW(reorder, double, nboun);
       NNEW(nreorder, ITG, nboun);
@@ -1031,8 +1036,8 @@ int main(int argc, char *argv[])
       SFREE(nreorder);
 
       /* for additional forces or loads in the present step, the
-	 corresponding slots in the force and load fields of the
-	 previous steps are initialized */
+         corresponding slots in the force and load fields of the
+         previous steps are initialized */
 
       RENEW(xforcold, double, nforc);
       for (i = nforcold; i < nforc; i++)
@@ -1101,11 +1106,12 @@ int main(int argc, char *argv[])
 
     /* energy */
 
-    if ((nener == 1) && (nenerold == 0)) {
-      NNEW(ener, double, mi[0] * ne * 2);
+    if ((nener = =1) && (nenerold = =0)) {
+      NNEW(ener, double, 2 * mi[0] * ne);
       if ((istep > 1) && (iperturb[0] > 1)) {
         printf(" *ERROR in CalculiX: in nonlinear calculations\n");
-        printf("        energy output must be selected in the first step\n\n");
+        printf("        energy output requests, if any,\n");
+        printf("        must be specified in the first step\n\n");
         FORTRAN(stop, ());
       }
     }
@@ -1177,7 +1183,7 @@ int main(int argc, char *argv[])
           iamload[i] = 0;
       }
       if (nener == 1)
-        RENEW(ener, double, mi[0] * ne * 2);
+        RENEW(ener, double, 2 * mi[0] * ne);
       if (norien > 0)
         RENEW(ielorien, ITG, mi[2] * ne);
       RENEW(ielmat, ITG, mi[2] * ne);
@@ -1297,13 +1303,13 @@ int main(int argc, char *argv[])
     if ((icascade == 0) && (nmethod < 8))
       RENEW(irow, ITG, nzs[2]);
 
-    /* nmethod=1: static analysis   */
-    /* nmethod=2: frequency analysis  */
-    /* nmethod=3: buckling analysis */
-    /* nmethod=4: (linear or nonlinear) dynamic analysis */
-    /* nmethod=5: steady state dynamics analysis */
-    /* nmethod=6: Coriolis frequency calculation */
-    /* nmethod=7: flutter frequency calculation */
+    /* nmethod=1:  static analysis   */
+    /* nmethod=2:  frequency analysis  */
+    /* nmethod=3:  buckling analysis */
+    /* nmethod=4:  (linear or nonlinear) dynamic analysis */
+    /* nmethod=5:  steady state dynamics analysis */
+    /* nmethod=6:  Coriolis frequency calculation */
+    /* nmethod=7:  flutter frequency calculation */
     /* nmethod=8:  magnetostatics */
     /* nmethod=9:  magnetodynamics */
     /* nmethod=10: electromagnetic eigenvalue problems */
@@ -1953,9 +1959,9 @@ int main(int argc, char *argv[])
       if (irefineloop == 1) {
 
         /* refinement was requested in the step which was just
-	   finished and a refined mesh was created and stored.
-	   The calculation has to restart from the beginning with
-	   this new mesh */
+           finished and a refined mesh was created and stored.
+           The calculation has to restart from the beginning with
+           this new mesh */
 
         memcpy(ipoinp, ipoinp_sav, sizeof(ITG) * 2 * nentries);
         memcpy(inp, inp_sav, sizeof(ITG) * inp_size);
@@ -2025,7 +2031,7 @@ int main(int argc, char *argv[])
                              &nbounold, &nforcold, &nloadold, &nbodyold, &mpcend,
                              irobustdesign, &nfc_, &ndc_));
 
-        //	SFREE(set);
+        //      SFREE(set);
         SFREE(meminset);
         SFREE(rmeminset);
         mt = mi[1] + 1;
@@ -2123,7 +2129,7 @@ int main(int argc, char *argv[])
       if ((ne1d != 0) || (ne2d != 0))
         RENEW(offset, double, 2 * ne);
       if (nener == 1)
-        RENEW(ener, double, mi[0] * ne * 2);
+        RENEW(ener, double, 2 * mi[0] * ne);
       if (norien > 0)
         RENEW(ielorien, ITG, mi[2] * ne);
       RENEW(ielmat, ITG, mi[2] * ne);
@@ -2139,9 +2145,6 @@ int main(int argc, char *argv[])
     }
 
     nload = nload0;
-
-    if ((nmethod == 4) && (iperturb[0] > 1))
-      SFREE(accold);
 
     if (irstrt[0] > 0) {
       jrstrt++;
@@ -2174,6 +2177,10 @@ int main(int argc, char *argv[])
                                &nfc, &ndc, coeffc, ikdc, edc, xmodal, accold));
       }
     }
+
+    if ((nmethod == 4) && (iperturb[0] > 1))
+      SFREE(accold);
+
   }
 
   FORTRAN(closefile, ());
