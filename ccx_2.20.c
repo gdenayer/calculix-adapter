@@ -1106,7 +1106,7 @@ int main(int argc, char *argv[])
 
     /* energy */
 
-    if ((nener = =1) && (nenerold = =0)) {
+    if ((nener == 1) && (nenerold == 0)) {
       NNEW(ener, double, 2 * mi[0] * ne);
       if ((istep > 1) && (iperturb[0] > 1)) {
         printf(" *ERROR in CalculiX: in nonlinear calculations\n");
