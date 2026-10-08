@@ -316,51 +316,6 @@ that does not occur with no-restart implicit iterations */
   tmax  = &timepar[3];
   tincf = &timepar[4];
 
-  /* Adapter: Put all the CalculiX data that is needed for the coupling into an array */
-  struct SimulationData simulationData = {
-      .ialset               = ialset,
-      .ielmat               = ielmat,
-      .istartset            = istartset,
-      .iendset              = iendset,
-      .kon                  = kon,
-      .ipkon                = ipkon,
-      .lakon                = lakon,
-      .co                   = co,
-      .set                  = set,
-      .nset                 = *nset,
-      .ikboun               = ikboun,
-      .ikforc               = ikforc,
-      .ilboun               = ilboun,
-      .ilforc               = ilforc,
-      .nboun                = *nboun,
-      .nforc                = *nforc,
-      .nelemload            = nelemload,
-      .nload                = *nload,
-      .sideload             = sideload,
-      .mt                   = mt,
-      .nk                   = *nk,
-      .ne                   = *ne,
-      .theta                = &theta,
-      .dtheta               = &dtheta,
-      .tper                 = tper,
-      .nmethod              = nmethod,
-      .xload                = xload,
-      .xforc                = xforc,
-      .xboun                = xboun,
-      .ntmat_               = ntmat_,
-      .vold                 = vold,
-      .veold                = veold,
-      .fn                   = fn,
-      .cocon                = cocon,
-      .ncocon               = ncocon,
-      .mi                   = mi,
-      .ttime                = ttime,  // DBG
-      .isModalDynamic       = 0,
-      .eigenDOFs            = NULL,
-      .eigenDOFsDerivatives = NULL,
-      .stored_iinc          = iinc,
-      .stored_jprint        = jprint};
-
   if (*ithermal == 4) {
     uncoupled = 1;
     *ithermal = 3;
@@ -1663,6 +1618,51 @@ that does not occur with no-restart implicit iterations */
   /* Adapter: Give preCICE the control of the time stepping */
   // while((1.-theta>1.e-6)||(negpres==1)){
 
+  /* Adapter: Put all the CalculiX data that is needed for the coupling into an array */
+  struct SimulationData simulationData = {
+      .ialset               = ialset,
+      .ielmat               = ielmat,
+      .istartset            = istartset,
+      .iendset              = iendset,
+      .kon                  = kon,
+      .ipkon                = ipkon,
+      .lakon                = lakon,
+      .co                   = co,
+      .set                  = set,
+      .nset                 = *nset,
+      .ikboun               = ikboun,
+      .ikforc               = ikforc,
+      .ilboun               = ilboun,
+      .ilforc               = ilforc,
+      .nboun                = *nboun,
+      .nforc                = *nforc,
+      .nelemload            = nelemload,
+      .nload                = *nload,
+      .sideload             = sideload,
+      .mt                   = mt,
+      .nk                   = *nk,
+      .ne                   = *ne,
+      .theta                = &theta,
+      .dtheta               = &dtheta,
+      .tper                 = tper,
+      .nmethod              = nmethod,
+      .xload                = xload,
+      .xforc                = xforc,
+      .xboun                = xboun,
+      .ntmat_               = ntmat_,
+      .vold                 = vold,
+      .veold                = veold,
+      .fn                   = fn,
+      .cocon                = cocon,
+      .ncocon               = ncocon,
+      .mi                   = mi,
+      .ttime                = ttime,  // DBG
+      .isModalDynamic       = 0,
+      .eigenDOFs            = NULL,
+      .eigenDOFsDerivatives = NULL,
+      .stored_iinc          = iinc,
+      .stored_jprint        = jprint};
+
   /* Adapter: Create the interfaces and initialize the coupling */
   Precice_Setup(configFilename, preciceParticipantName, &simulationData);
 
@@ -1672,7 +1672,7 @@ that does not occur with no-restart implicit iterations */
     Precice_AdjustSolverTimestep(&simulationData);
     /* Adapter read coupling data if available */
     Precice_ReadCouplingData(&simulationData);
-  
+
     if (icutb == 0) {
 
       /* previous increment converged: update the initial values */

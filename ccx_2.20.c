@@ -28,7 +28,6 @@ _set_output_format(_TWO_DIGIT_EXPONENT);
 #include <stdlib.h>
 #include <string.h>
 #include "CalculiX.h"
-#include "dyna_precice.h"
 
 #ifdef CALCULIX_MPI
 ITG myid = 0, nproc = 0;
@@ -108,6 +107,7 @@ int main(int argc, char *argv[])
   double totalCalculixTime;
 
   /*
+ * Adapter:
  * Additional variables for the coupling with preCICE
  * preCICE is used only if a participant name is provided as a command line argument!
  */
@@ -150,6 +150,7 @@ int main(int argc, char *argv[])
         strcpy(output,argv[i+1]);break;}
         }*/
 
+    /* Adapter: parse a second time all command lines argument to see if some are relevant to preCICE */
     for (i = 1; i < argc; i++) {
       if (strcmp1(argv[i], "-o") == 0) {
         strcpy(output, argv[i + 1]);
@@ -1319,6 +1320,9 @@ int main(int argc, char *argv[])
     /* nmethod=14: Robustness w.r.t. to geometric tolerances */
     /* nmethod=15: Crack propagation */
     /* nmethod=16: Feasible direction based on sensitivity information */
+
+    /* Adapter: if preCICE is used, override the main loop and use our own. */
+
     if (preciceUsed) {
       int isStaticOrDynamic = ((nmethod == 1) || (nmethod == 4)) && (iperturb[0] > 1);
       int isDynamic         = ((nmethod == 4) && (iperturb[0] > 1));
@@ -1518,7 +1522,7 @@ int main(int argc, char *argv[])
                      t0g, t1g,
                      preciceParticipantName, configFilename);
       } else {
-        printf("ERROR: Only thermal coupling or FSI is available with preCICE");
+        printf("ERROR: No compatible simulation type was detected. Consult the adapter documentation and check your CalculiX input file for keywords indicating simulation types only supported by the uncoupled CalculiX (e.g., FREQUENCY).");
         exit(0);
       }
     } else if ((nmethod <= 1) || (nmethod == 11) || ((iperturb[0] > 1) && (nmethod < 8))) {

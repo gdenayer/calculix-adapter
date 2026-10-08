@@ -38,7 +38,6 @@
 /* Adapter: Add header */
 #include "adapter/OutputBuffer.h"
 #include "adapter/PreciceInterface.h"
-#include "precice/preciceC.h"
 
 void dyna_precice(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp, ITG *ne,
                   ITG **nodebounp, ITG **ndirbounp, double **xbounp, ITG *nboun,
